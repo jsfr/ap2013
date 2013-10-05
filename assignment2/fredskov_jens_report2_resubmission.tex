@@ -1,0 +1,81 @@
+\documentclass[a4paper, 11pt]{article}
+\usepackage[utf8x]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{ucs}
+\usepackage[english]{babel}
+\usepackage{lmodern}
+\usepackage{mathtools, amsfonts}
+\usepackage[parfill]{parskip}
+\usepackage{graphicx, float}
+
+\usepackage{fancyhdr} % Custom headers and footers
+\pagestyle{fancyplain} % Makes all pages in the document conform to the custom headers and footers
+\fancyhead{} % No page header - if you want one, create it in the same way as the footers below
+\fancyfoot[L]{} % Empty left footer
+\fancyfoot[C]{} % Empty center footer
+\fancyfoot[R]{\thepage} % Page numbering for right footer
+\renewcommand{\headrulewidth}{0pt} % Remove header underlines
+\renewcommand{\footrulewidth}{0pt} % Remove footer underlines
+\setlength{\headheight}{13.6pt} % Customize the height of the header
+
+\widowpenalty=1000
+\clubpenalty=1000
+
+\newcommand{\horrule}[1]{\rule{\linewidth}{#1}} % Create horizontal rule command with 1 argument of height
+
+\title{ 
+\normalfont\normalsize 
+\textsc{University of Copenhagen} \\ [25pt] % Your university, school and/or department name(s)
+\horrule{0.5pt} \\[0.4cm] % Thin top horizontal rule
+\huge Assignment 2: Counting parentheses \\ \Large - resubmission % The assignment title
+\horrule{2pt} \\[0.5cm] % Thick bottom horizontal rule
+}
+
+\author{Jens Fredskov (chw752)} % Your name
+
+\date{\normalsize\today} % Today's date or a custom date
+
+\begin{document}
+\maketitle
+
+\section{Introduction} % (fold)
+\label{sec:introduction}
+
+The following report describes the implementation and testing of \emph{let} and \emph{lambda} in Haskell library for interpreting the APLisp dialect. 
+
+% section introduction (end)
+
+\section{Implementation} % (fold)
+\label{sec:implementation}
+
+\subsection{Let} % (fold)
+\label{sub:let}
+
+\emph{let} is implemented in \texttt{eval}. If the scope is empty we evaluate tyhe body. If there actually are variables in the scope we evaluate each of their values and using \texttt{bindVar} with \texttt{local} binds it in the a local environment. Finally we again evaluate the body using the new environment.
+
+% subsection let (end)
+
+\subsection{Lambda} % (fold)
+\label{sub:lambda}
+
+In \texttt{eval} \emph{lambda} is merely returned. This means that we can store a \emph{lambda} in a \emph{let} and then apply it using \texttt{funcall}. This is done in \texttt{apply} where we allow either a single argument or a list of arguments. \texttt{apply} sends its arguments to \texttt{evalLambda} which binds every parameter to the respective argument of in a local scope and then evaluates the body. If there is a mismatch between arguments and parameters an error is returned.
+
+% subsection lambda (end)
+
+% section implementation (end)
+
+\section{Testing} % (fold)
+\label{sec:testing}
+
+Extra test cases have been added in \texttt{APLispTest.hs} to test \emph{let} and \emph{lambda}, all of which returns the expected results.
+
+% section testing (end)
+
+\section{Conclusion} % (fold)
+\label{sec:conclusion}
+
+The implementation of \emph{let} and \emph{lambda} have been described. The tests have been documented and all return the expected result.
+
+% section conclusion (end)
+
+\end{document}

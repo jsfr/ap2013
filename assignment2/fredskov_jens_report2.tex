@@ -1,0 +1,106 @@
+\documentclass[a4paper, 11pt]{article}
+\usepackage[utf8x]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{ucs}
+\usepackage[english]{babel}
+\usepackage{lmodern}
+\usepackage{mathtools, amsfonts}
+\usepackage[parfill]{parskip}
+\usepackage{graphicx, float}
+
+\usepackage{fancyhdr} % Custom headers and footers
+\pagestyle{fancyplain} % Makes all pages in the document conform to the custom headers and footers
+\fancyhead{} % No page header - if you want one, create it in the same way as the footers below
+\fancyfoot[L]{} % Empty left footer
+\fancyfoot[C]{} % Empty center footer
+\fancyfoot[R]{\thepage} % Page numbering for right footer
+\renewcommand{\headrulewidth}{0pt} % Remove header underlines
+\renewcommand{\footrulewidth}{0pt} % Remove footer underlines
+\setlength{\headheight}{13.6pt} % Customize the height of the header
+
+\widowpenalty=1000
+\clubpenalty=1000
+
+\newcommand{\horrule}[1]{\rule{\linewidth}{#1}} % Create horizontal rule command with 1 argument of height
+
+\title{ 
+\normalfont\normalsize 
+\textsc{University of Copenhagen} \\ [25pt] % Your university, school and/or department name(s)
+\horrule{0.5pt} \\[0.4cm] % Thin top horizontal rule
+\huge Assignment 2: Counting parentheses \\ % The assignment title
+\horrule{2pt} \\[0.5cm] % Thick bottom horizontal rule
+}
+
+\author{Jens Fredskov (chw752)} % Your name
+
+\date{\normalsize\today} % Today's date or a custom date
+
+\begin{document}
+\maketitle
+
+\section{Introduction} % (fold)
+\label{sec:introduction}
+
+The following report describes the implementation and testing of a Haskell library to intepret the APLisp dialect.
+
+% section introduction (end)
+
+\section{Implementation} % (fold)
+\label{sec:implementation}
+
+The library has been implemented in the file \texttt{APLisp.hs}. At the moment the \emph{let}-keyword and the use of lambdas has not been implemented.
+
+\subsection{Types and data structures} % (fold)
+\label{sub:types_and_data_structures}
+
+The environment type has been implemented as:
+
+\begin{verbatim}
+newtype APLispExec a = RC { runLisp :: Environment -> Either String a }
+\end{verbatim}
+
+We use \emph{Either} because it allows us to propagate an error message up through the interpretation, whereas we with e.g. \emph{Maybe} would be able to have only one error message. This also means that the \emph{fail} keyword is not used anywhere.
+
+In the same way \emph{Result} has been defined as
+
+\begin{verbatim}
+type Result = Either String SExp
+\end{verbatim}
+
+Allowing us to pass an error message from either the parse or the interpreter if necessary.
+
+% subsection types_and_data_structures (end)
+
+\subsection{Functions} % (fold)
+\label{sub:functions}
+The main function \texttt{interpret} takes in a string parses it and then tries to interpret it using \texttt{eval} with an empty environment (since we have yet to bind anything).
+
+\texttt{eval} evaluates the expressions and in case of a function application (such as an arithmetic operator) sends the evaluated arguments and the operator to \texttt{apply}.
+
+\texttt{apply} applies the operator to the given arguments (if valid) and returns the result. In case of arithmetic operators it expects the arguments to be \emph{IntVal} as \texttt{eval} is expected to have evaluated all arguments beforehand.
+
+Both \texttt{eval} and \texttt{apply} uses the function \texttt{invalid} as a shorthand for defining a \emph{Left} when an error occurs.
+
+% subsection functions (end)
+
+% section implementation (end)
+
+\section{Testing} % (fold)
+\label{sec:testing}
+
+As most of the time was spent trying to implement the missing parts of the assignment, the testing of the implemented part is not complete. A test suite can be found in \texttt{APLispTest.hs}.
+
+Currently the suite uses HUnit to test different cases of the implemented parts. The suite tests wheter a program gives the expected result, where the result is either a \emph{SExp} or an error, e.g. in the case of division by zero.
+
+In all the tried test cases the implementation returns the expected result, thus it seems that what has been implemented works. The tests however are still not exhaustive.
+
+% section testing (end)
+
+\section{Conclusion} % (fold)
+\label{sec:conclusion}
+
+We have now described the implementation of the library, and accounted for the overall structure of the library.. The testing of the library have been described, and we have concluded that the implemented parts of the library has worked as expected in all of our tests.
+
+% section conclusion (end)
+
+\end{document}

@@ -1,0 +1,88 @@
+\documentclass[a4paper, 11pt]{article}
+\usepackage[utf8x]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{ucs}
+\usepackage[english]{babel}
+\usepackage{lmodern}
+\usepackage{mathtools, amsfonts}
+\usepackage[parfill]{parskip}
+\usepackage{graphicx, float}
+
+\usepackage{fancyhdr} % Custom headers and footers
+\pagestyle{fancyplain} % Makes all pages in the document conform to the custom headers and footers
+\fancyhead{} % No page header - if you want one, create it in the same way as the footers below
+\fancyfoot[L]{} % Empty left footer
+\fancyfoot[C]{} % Empty center footer
+\fancyfoot[R]{\thepage} % Page numbering for right footer
+\renewcommand{\headrulewidth}{0pt} % Remove header underlines
+\renewcommand{\footrulewidth}{0pt} % Remove footer underlines
+\setlength{\headheight}{13.6pt} % Customize the height of the header
+
+\widowpenalty=1000
+\clubpenalty=1000
+
+\newcommand{\horrule}[1]{\rule{\linewidth}{#1}} % Create horizontal rule command with 1 argument of height
+
+\title{ 
+\normalfont\normalsize 
+\textsc{University of Copenhagen} \\ [25pt] % Your university, school and/or department name(s)
+\horrule{0.5pt} \\[0.4cm] % Thin top horizontal rule
+\huge Assignment 2: Counting parentheses \\ % The assignment title
+\horrule{2pt} \\[0.5cm] % Thick bottom horizontal rule
+}
+
+\author{Jens Fredskov (chw752)} % Your name
+
+\date{\normalsize\today} % Today's date or a custom date
+
+\begin{document}
+\maketitle
+
+\section{Introduction} % (fold)
+\label{sec:introduction}
+
+The following report describes the implementation and testing of Piano numbers, different arithmetic operations and prime number operations in Prolog.
+
+% section introduction (end)
+
+\section{Implementation} % (fold)
+\label{sec:implementation}
+
+The library has been implemented in the file \texttt{nats.pl}. The file implements comparison (only less than), addition, multiplication and modulus.
+
+We could further implement minus, power and square root using these. Minus could be done by simply querying for the first or second argument of add, since this corresponds to either $ n_3 - n_1 = n_2 $ or $ n_3 - n_2 = n_1 $. Power could be implemented using multiplication where we multiply the argument with itself as many times as needed. As with minus square root could be implemented by querying the multiplication for a known result with the multiplicands being the same argument, e.g \emph{mult(X, X, 9)}.
+
+The file also implements predicates to query for assert whether a number is a prime, list a number of primes, and assert whether a number is a super-prime.
+% section implementation (end)
+
+\section{Testing} % (fold)
+\label{sec:testing}
+
+The predicates have been tested using the test predicates in \texttt{nats.pl} which allows us to use normal base 10 numbers, allowing for easier testing.
+
+These have been used to test the predicates for randomly selected numbers. All of the functions have worked as expected when tested.
+
+The \emph{listPrimes} predicate with numbers greater than 12 yields several results, which is undesirable. All of them are however the same, and correct. The exact reason is not clear, but it seems to be due to the way the predicate chooses between the first or second clause.
+
+When using using \emph{mult} with the example from the assignment text it returns the correct output and halts. The query halts because addition is implemented in such a way that it will only give one result and because the first two arguments are bounded using \emph{less}.
+
+When querying \texttt{notprime(X)}, the following is obtained:
+
+\[
+    [0, 1, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, \ldots]
+\]
+
+The first two because they are handled by facts, whereas the rest is all even numbers.
+
+When querying \texttt{prime(X)} no non-primes are shown up at least up to 100.
+
+% section testing (end)
+
+\section{Conclusion} % (fold)
+\label{sec:conclusion}
+
+We have now described the implementation. The testing of the implementation has been described, and we have concluded that the implemented parts of the library has worked as expected in all of our tests.
+
+% section conclusion (end)
+
+\end{document}

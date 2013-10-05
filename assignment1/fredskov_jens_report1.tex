@@ -1,0 +1,96 @@
+\documentclass[a4paper, 11pt]{article}
+\usepackage[utf8x]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{ucs}
+\usepackage[english]{babel}
+\usepackage{lmodern}
+\usepackage{mathtools, amsfonts}
+\usepackage[parfill]{parskip}
+\usepackage{graphicx, float}
+
+\usepackage{fancyhdr} % Custom headers and footers
+\pagestyle{fancyplain} % Makes all pages in the document conform to the custom headers and footers
+\fancyhead{} % No page header - if you want one, create it in the same way as the footers below
+\fancyfoot[L]{} % Empty left footer
+\fancyfoot[C]{} % Empty center footer
+\fancyfoot[R]{\thepage} % Page numbering for right footer
+\renewcommand{\headrulewidth}{0pt} % Remove header underlines
+\renewcommand{\footrulewidth}{0pt} % Remove footer underlines
+\setlength{\headheight}{13.6pt} % Customize the height of the header
+
+\widowpenalty=1000
+\clubpenalty=1000
+
+\newcommand{\horrule}[1]{\rule{\linewidth}{#1}} % Create horizontal rule command with 1 argument of height
+
+\title{ 
+\normalfont\normalsize 
+\textsc{University of Copenhagen} \\ [25pt] % Your university, school and/or department name(s)
+\horrule{0.5pt} \\[0.4cm] % Thin top horizontal rule
+\huge Assignment 1: Curvy Syntax \\ % The assignment title
+\horrule{2pt} \\[0.5cm] % Thick bottom horizontal rule
+}
+
+\author{Jens Fredskov (chw752)} % Your name
+
+\date{\normalsize\today} % Today's date or a custom date
+
+\begin{document}
+\maketitle
+
+\section{Introduction} % (fold)
+\label{sec:introduction}
+
+The following report describes the implementation and testing of a Haskell library to parse curve programs to an abstract syntax tree.
+
+% section introduction (end)
+
+\section{Implementation} % (fold)
+\label{sec:implementation}
+
+The library is implemented in the file \texttt{CurvySyntax.hs} and uses the abstract syntax from \texttt{CurveAST}, which has not been modified. The library is implemented using SimpleParse.
+
+The implementation follows the given grammar. This also means that \texttt{width} and \texttt{height} binds stronger than any curve operations, since they are further down the list.
+
+In general the implementation uses a parser combinator for each rule in the grammar. The exception is \emph{Defs} which is not need since it can be integrated in \emph{Program}. Furthermore there also exists combinators for \emph{Number} and \emph{Ident}.
+
+To establish precedence between operators \texttt{chainl1} has been used in \texttt{expr} and \texttt{curve}. Furthermore \texttt{curve} uses a variant of \texttt{chainl1} called \texttt{eval} which allows to raise an operator and apply two different parsers to the sides instead of one.
+
+When parsing for strings \texttt{symbol} is in general used. The exception being in \texttt{curve} and \texttt{number}. The first because some operators require at least one space and other can have zero or more (thus either \texttt{many space} or \texttt{many1 space} is used).
+
+The type \emph{Error} has been defined as a string, and when returned in \texttt{parseString} gives an appropriate error message, to let the user know that the parser failed.
+
+% section implementation (end)
+
+\section{Testing} % (fold)
+\label{sec:testing}
+
+The implementation have been tested using the curve programs defined in the directory \texttt{tests}. Test 1 through 5 all parse, while 6 through 9 fail. Here a list of the tests is given, summing why what they test.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{c|p{0.9\textwidth}}
+    test1 & Tests creation of a curve. Either a point or another curve. \\
+    test2 & Tests the precedence of expression operators over curve operators. \\
+    test3 & Tests precedence between curve operators and the use of parentheses to change the precedence. \\
+    test4 & Tests the use of \emph{where}. \\
+    test5 & Tests the use of several curve operators, their precedence and spacing between operators. \\
+    test6 & Fails because a keyword is used as identifier. \\
+    test7 & Fails because of incorrect spacing between operators. \\
+    test8 & Fails because the \emph{where}-clause is defined but empty, which is wrong according to the grammar. \\
+    test9 & Fails because only a curve with no definition is given. \\
+\end{tabular}
+\end{table}
+
+All the tests yielded the expected result, test5 however is somewhat slow. We can thus conclude that the library works correct in our tests, and seemingly in general.
+
+% section testing (end)
+
+\section{Conclusion} % (fold)
+\label{sec:conclusion}
+
+We have now described the implementation of the library, and accounted for the overall structure of the library and the parser combinators used to construct the complete parser. The testing of the library have been described, and we have concluded that the library has worked as expected in all of our tests.
+
+% section conclusion (end)
+
+\end{document}

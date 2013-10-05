@@ -1,0 +1,22 @@
+Program ::= Defs
+Defs  ::= Def
+       |  Def Defs
+Def   ::= Ident '=' Curve
+       |  Ident '=' Curve 'where' '{' Defs '}'
+Curve ::= Curve '++' Curve
+       |  Curve '^' Curve
+       |  Curve '->' Point
+       |  Curve '**' Expr
+       |  Curve 'refv' Expr
+       |  Curve 'refh' Expr
+       |  Curve 'rot' Expr
+       |  '(' Curve ')'
+       |  Point
+       |  Ident
+Point ::= '(' Expr ',' Expr ')'
+Expr  ::= Expr '+' Expr
+       |  Expr '*' Expr
+       |  'width' Curve
+       |  'height' Curve
+       |  Number
+       |  '(' Expr ')'

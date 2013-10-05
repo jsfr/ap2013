@@ -1,0 +1,132 @@
+\documentclass[a4paper, 11pt]{article}
+\usepackage[utf8x]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{ucs}
+\usepackage[english]{babel}
+\usepackage{lmodern}
+\usepackage{mathtools, amsfonts}
+\usepackage[parfill]{parskip}
+\usepackage{graphicx, float}
+
+\newcommand{\executeiffilenewer}[3]{%
+    \ifnum\pdfstrcmp{\pdffilemoddate{#1}}%
+    {\pdffilemoddate{#2}}>0%
+    {\immediate\write18{#3}}\fi%
+}
+
+\newcommand{\includesvg}[1]{%
+    \executeiffilenewer{#1.svg}{#1.pdf}%
+    {inkscape -z -D --file=#1.svg %
+    --export-pdf=#1.pdf --export-latex}%
+    \input{#1.pdf_tex}
+}
+
+\usepackage{fancyhdr} % Custom headers and footers
+\pagestyle{fancyplain} % Makes all pages in the document conform to the custom headers and footers
+\fancyhead{} % No page header - if you want one, create it in the same way as the footers below
+\fancyfoot[L]{} % Empty left footer
+\fancyfoot[C]{} % Empty center footer
+\fancyfoot[R]{\thepage} % Page numbering for right footer
+\renewcommand{\headrulewidth}{0pt} % Remove header underlines
+\renewcommand{\footrulewidth}{0pt} % Remove footer underlines
+\setlength{\headheight}{13.6pt} % Customize the height of the header
+
+\widowpenalty=1000
+\clubpenalty=1000
+
+\newcommand{\horrule}[1]{\rule{\linewidth}{#1}} % Create horizontal rule command with 1 argument of height
+
+\title{ 
+\normalfont\normalsize 
+\textsc{University of Copenhagen} \\ [25pt] % Your university, school and/or department name(s)
+\horrule{0.5pt} \\[0.4cm] % Thin top horizontal rule
+\huge Assignment 0: Curves \\ % The assignment title
+\horrule{2pt} \\[0.5cm] % Thick bottom horizontal rule
+}
+
+\author{Jens Fredskov (chw752)} % Your name
+
+\date{\normalsize\today} % Today's date or a custom date
+
+\begin{document}
+\maketitle
+
+\section{Introduction} % (fold)
+\label{sec:introduction}
+The following report describes the implementation and testing of a Haskell library to work with curves.
+% section introduction (end)
+
+\section{Implementation} % (fold)
+\label{sec:implementation}
+The library has been implemented in the file named \texttt{Curve.hs}
+
+\subsection{Data structures} % (fold)
+\label{sub:data_structures}
+The representation of a point has been implemented as:
+
+\begin{verbatim}
+    data Point = Point Double Double
+\end{verbatim}
+
+The structure is straightforward. It could just as well have been:
+
+\begin{verbatim}
+    data Point = Point (Double, Double)
+\end{verbatim}
+
+However the chosen representation allows for more readable code with fewer parentheses. Furthermore we cannot simply define a type alias, as this prevents us from defining \texttt{Point} as an instance of \texttt{Eq}.
+
+The representation of a curve is simply a type alias to a list of points. The implementation then assumes there is a line segment between every two points, so that a list $[p_0, p_1, p_2, \ldots , p_{n-1}, p_n]$ has line segments $[p_0 p_1, p_1 p_2, \ldots , p_{n-1} p_n ]$. Had we instead represented the curve in terms of line segments we could have omitted some segments to create a curve with disjoint elements. This however can be achieved in the chosen representation using several curves, and furthermore we also avoid redundancy by not having to specify the same point twice.
+
+% subsection data_structures (end)
+
+\subsection{Functions} % (fold)
+\label{sub:functions}
+\texttt{connect} could simply connect two curves using the \texttt{++}-function. This however means that if one curve ends in the same point as the next begins in we create a redundant line segment of length zero. Two avoid such segments, the function uses a guard to determine if the last point of the first curve and the first point of the second curve are equivalent, and if true removes the first point of the second curve before connecting them. Otherwise the two curves are simply connected.
+
+\texttt{reflect} negates the first or second component of every point in the curve (depending of which axis we reflect over) and furthermore adds the point where the axis lies two times, as this corresponds to reflect with respect to an axis running through the point.
+
+\texttt{toSvg} uses a helper function \texttt{move} which works somewhat similar to translate. The functions translates the curve so that the minimal point of the bounding box lies in $(0,0)$, as the coordinate system of SVG only handles positive numbers. To generate the line segments the curve is zipped with its tail giving pairs corresponding to the segments.
+% subsection functions (end)
+
+% section implementation (end)
+
+\section{Testing} % (fold)
+\label{sec:testing}
+The curve library has been tested using the functions in \texttt{Hilbert.hs}. The file runs the function \texttt{hilbert} a given number of times to generate a space-filling curve. The output of running:
+
+\begin{verbatim}
+    toFile (hilbertN 4) "./Hilbert.svg"
+\end{verbatim}
+
+can be seen in figure~\ref{fig:Hilbert}.
+
+\begin{figure}[H]
+    \centering
+    %\def\svgwidth{\columnwidth}
+   \includesvg{Hilbert}
+   \caption{The space-filling curve generated from \texttt{Hilbert.hs}}
+\label{fig:Hilbert}
+\end{figure}
+
+The output corresponds to the expected output. Because the function builds the curve by recursively applying itself on the previous curve, we now that the library must produce a correct Hilbert curve for any number of iterations.
+
+The Hilbert curve tests the creation of points and curves (using the constructor functions). It tests all of the curve manipulation functions (it does not test the case of \texttt{reflect} where the axis is vertical, but giving that this corresponds to the horizontal version it we are able to say that it should also be correct). Except for the \texttt{toList} (which is trivial) all of the converter functions are used.
+
+The Hilbert curve does not test the guard on \texttt{connect}. But running:
+
+\begin{verbatim}
+    (curve (point(0,0)) []) `connect` (curve (point(0,0)) [])
+\end{verbatim}
+
+Which returns \texttt{[Point 0.0 0.0]} indicates that this works as intended.
+
+We can thus conclude that the library works correct in our test, seemingly in general.
+% section testing (end)
+
+\section{Conclusion} % (fold)
+\label{sec:conclusion}
+We have now described the implementation of the library, and accounted for design decision with regard to data structures and functions. The testing of the library have been described, and we have concluded that the library has worked correct in all of our tests.
+% section conclusion (end)
+
+\end{document}
