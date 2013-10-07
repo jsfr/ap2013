@@ -58,14 +58,14 @@ toString(Num) ->
 
 printer(FileName, CurPosition) ->
 	EndText = "</svg>\n",
-	receive
+	{NextPosition, WritePosition, NewFileName, NewText} =
+        receive
 	{stop} ->
 	    io:format("Printer ~p stopping~n", [self()]);
-	{reset, NewFileName} -> 
+	{reset, ResetFileName} -> 
 		Text = "<svg xmlns=\"http://www.w3.org/2000/svg\">\n\n",
-		file:delete(NewFileName),
-		NextPosition = string:len(Text),
-		WritePosition = 0;
+		file:delete(ResetFileName),
+		{string:len(Text), 0, ResetFileName};
 	{line, Pos1, Pos2} ->
 		{X1, Y1} = Pos1, 
 		{X2, Y2} = Pos2,
@@ -74,9 +74,7 @@ printer(FileName, CurPosition) ->
 			toString(X1) ++ "," ++ toString(Y1) ++ " " ++
 			toString(X2) ++ "," ++ toString(Y2) ++ "\"" ++
 			" style=\"fill:none;stroke:black;stroke-width:1\" />\n",
-		NextPosition = CurPosition + string:len(Text),
-		WritePosition = CurPosition,
-		NewFileName = FileName;
+		{CurPosition + string:len(Text), CurPosition, FileName, Text};
 	{box, Bound} ->
 		{X1, Y1, X2, Y2} = Bound,
 		Text = 
@@ -87,21 +85,16 @@ printer(FileName, CurPosition) ->
 			toString(X2) ++ "," ++ toString(Y1) ++ " " ++
 			toString(X1) ++ "," ++ toString(Y1) ++ "\"" ++
 			" style=\"fill:none;stroke:black;stroke-width:1\" />\n",
-		NextPosition = CurPosition + string:len(Text),
-		WritePosition = CurPosition,
-		NewFileName = FileName;
+		{CurPosition + string:len(Text), CurPosition, FileName, Text};
 	{point, Pos, Size} ->
 		{X,Y} = Pos,
 		Text = 
 			"<circle cx=\"" ++ toString(X) ++
 			"\" cy=\"" ++ toString(Y) ++
 			"\" r=\"" ++ toString(Size) ++ "\" stroke=\"black\" stroke-width=\"2\" fill=\"red\"/>\n",
-		NextPosition = CurPosition + string:len(Text),
-		WritePosition = CurPosition,
-		NewFileName = FileName
+		{CurPosition + string:len(Text), CurPosition, FileName, Text}
 	end,
 	{ok,File} = file:open(NewFileName, [read,write]),
-	file:pwrite(File, WritePosition, Text ++ EndText),
+	file:pwrite(File, WritePosition, NewText ++ EndText),
 	file:close(File),
 	printer(NewFileName, NextPosition).
-

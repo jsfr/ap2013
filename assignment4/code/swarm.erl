@@ -4,36 +4,21 @@
 %%% Created : Jan 2013 
 %%% Usage   : Assignemnt for Advanced Programming 2013
 %%%---------------------------------------------------------------------
-%%% Student : [ADD HERE]
-%%% KU-ID   : [ADD HERE]
-%%%---------------------------------------------------------------------
-%%% Student : [ADD HERE]
-%%% KU-ID   : [ADD HERE]
+%%% Student : Jens Fredskov
+%%% KU-ID   : chw752
 %%%---------------------------------------------------------------------
 
 -module(swarm).
 
+fishLoop_init(Qtree) ->
+	{ok, spawn(fun() -> fishLoop(Qtree) end)}.
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fishLoop(Qtree) ->
+	quadtree:mapFunction(Qtree, moveFish/1, universe),
+	timer:sleep(50),
+	
+	timer:sleep(50),
+	fishLoop(Qtree).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

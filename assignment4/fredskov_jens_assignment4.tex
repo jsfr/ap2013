@@ -1,0 +1,87 @@
+\documentclass[a4paper, 11pt]{article}
+\usepackage[utf8x]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{ucs}
+\usepackage[english]{babel}
+\usepackage{lmodern}
+\usepackage{mathtools, amsfonts}
+\usepackage[parfill]{parskip}
+\usepackage{graphicx, float}
+
+\usepackage{fancyhdr} % Custom headers and footers
+\pagestyle{fancyplain} % Makes all pages in the document conform to the custom headers and footers
+\fancyhead{} % No page header - if you want one, create it in the same way as the footers below
+\fancyfoot[L]{} % Empty left footer
+\fancyfoot[C]{} % Empty center footer
+\fancyfoot[R]{\thepage} % Page numbering for right footer
+\renewcommand{\headrulewidth}{0pt} % Remove header underlines
+\renewcommand{\footrulewidth}{0pt} % Remove footer underlines
+\setlength{\headheight}{13.6pt} % Customize the height of the header
+
+\widowpenalty=1000
+\clubpenalty=1000
+
+\newcommand{\horrule}[1]{\rule{\linewidth}{#1}} % Create horizontal rule command with 1 argument of height
+
+\title{ 
+\normalfont\normalsize 
+\textsc{University of Copenhagen} \\ [25pt] % Your university, school and/or department name(s)
+\horrule{0.5pt} \\[0.4cm] % Thin top horizontal rule
+\huge Assignment 4: Swarm Simulation using Quadtrees\\ % The assignment title
+\horrule{2pt} \\[0.5cm] % Thick bottom horizontal rule
+}
+
+\author{Jens Fredskov (chw752)} % Your name
+
+\date{\normalsize\today} % Today's date or a custom date
+
+\begin{document}
+\maketitle
+
+\section{Introduction} % (fold)
+\label{sec:introduction}
+
+The following report describes the implementation and testing of a quadtree library and fish farm simulation in Erlang.
+% section introduction (end)
+
+\section{Implementation} % (fold)
+\label{sec:implementation}
+
+\subsection{The Quadtree} % (fold)
+\label{sub:the_quadtree}
+
+The quadtree library has been implemented in the file \texttt{quadtree.erl}. The functions used for the coordinator, nodes and leaves all communicate with asynchronous messaging. This e.g. means that we do not wait around for an element to be inserted, by just send the message and move on.
+
+The children of a node is contained in a list of tuples, where each child is matched with its respective corner, allowing us to easier decide where messages should be sent.
+
+When a leaf reaches its limit, it converts to a node by spawning four new empty leaves, and then afterwards sending adds to these with the correct elements.
+
+When the tree applies a function (with \texttt{MapFunction/3}) the function propagates down through the tree to all leaves which have elements within the specified bounds. After applying the function if all elements in a leaf which are out of bounds, will be sent to its parent as an add. In this way the elements move up through the tree and down to the new leaf where it should be added.
+% subsection the_quadtree (end)
+
+\subsubsection{The Fish Farm} % (fold)
+\label{ssub:the_fish_farm}
+
+The fish farm has been implemented in \texttt{swarm.erl}. The implementation of the fish farm is not yet complete, as the majority of time was spent implementing the quadtree library.
+
+% subsubsection the_fish_farm (end)
+
+% section implementation (end)
+
+\section{Testing} % (fold)
+\label{sec:testing}
+
+It was not possible to get the given printer example to work.
+
+As most of the time was spent implementing the tree only ``on the fly'' tests have been made using \texttt{io:formats} to print the contents of the tree. These all seem to have been correct, but as no proper automated tests have been made and supplied, we cannot say much about the correctness of the implementation
+
+% section testing (end)
+
+\section{Conclusion} % (fold)
+\label{sec:conclusion}
+
+We have now described the implementation of the quadtree library and fish farm simulation. We have also described how the implementation has been tested and have concluded that we cannot say much about whether the implementation is correct.
+
+% section conclusion (end)
+
+\end{document}

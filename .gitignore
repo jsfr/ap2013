@@ -1,0 +1,5 @@
+*.beam
+*.synctex.gz
+*.log
+*.fdb_latexmk
+*.aux
