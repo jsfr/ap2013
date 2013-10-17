@@ -108,6 +108,7 @@ qtreeNode(Bound, Limit, Parent, Children) ->
 	  		qtreeNode(Bound, Limit, Parent, Children);
 	  	{mapFun, MapFun, MapBound} -> [mapFunChild(C, MapFun, MapBound, Bound) || C <- Children];
 	  	{mapTreeFun, TreeFun} ->
+            TreeFun(Bound),
 	  		[send_mapTree(C, TreeFun) || {_, C} <- Children],
 	  		qtreeNode(Bound, Limit, Parent, Children)
     end.
@@ -146,7 +147,7 @@ qtreeLeaf(Bound, Limit, Parent, Data) ->
 	  			empty -> ok
 	  		end;
 	  	{mapTreeFun, TreeFun} ->
-	  		[TreeFun(E) || E <- Data],
+	  		TreeFun(Bound),
 	  		qtreeLeaf(Bound, Limit, Parent, Data)
     end.
 

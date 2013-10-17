@@ -57,7 +57,7 @@ toString(Num) ->
 	lists:flatten(io_lib:format("~p", [Num])).
 
 printer(FileName, CurPosition) ->
-	EndText = "</svg>\n",
+	EndText = "\n",
 	{NextPosition, WritePosition, NewFileName, NewText} =
         receive
 	{stop} ->
@@ -65,7 +65,7 @@ printer(FileName, CurPosition) ->
 	{reset, ResetFileName} -> 
 		Text = "<svg xmlns=\"http://www.w3.org/2000/svg\">\n\n",
 		file:delete(ResetFileName),
-		{string:len(Text), 0, ResetFileName};
+		{string:len(Text), 0, ResetFileName, Text};
 	{line, Pos1, Pos2} ->
 		{X1, Y1} = Pos1, 
 		{X2, Y2} = Pos2,

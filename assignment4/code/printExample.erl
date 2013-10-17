@@ -85,5 +85,3 @@ run() ->
 	timer:sleep(100),
 
 	{Qtree,Printer}.
-
-
