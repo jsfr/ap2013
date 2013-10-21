@@ -57,7 +57,7 @@ toString(Num) ->
 	lists:flatten(io_lib:format("~p", [Num])).
 
 printer(FileName, CurPosition) ->
-	EndText = "\n",
+	EndText = "\n</svg>",
 	{NextPosition, WritePosition, NewFileName, NewText} =
         receive
 	{stop} ->

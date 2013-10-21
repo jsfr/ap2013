@@ -55,15 +55,15 @@ send_mapFun(Pid, MapFun, MapBound) ->
 send_stop(Pid) -> info(Pid, stop).
 
 %% synchronous communication
-rpc(Pid, Request) ->
-    Pid ! {self(), Request},
-    receive {Pid, Response} -> Response end.
+% rpc(Pid, Request) ->
+%     Pid ! {self(), Request},
+%     receive {Pid, Response} -> Response end.
 
-reply(From, Msg) -> From ! {self(), Msg}.
+% reply(From, Msg) -> From ! {self(), Msg}.
 
-reply_ok(From) -> reply(From, ok).
+% reply_ok(From) -> reply(From, ok).
 
-reply_ok(From, Msg) -> reply(From, {ok, Msg}).
+% reply_ok(From, Msg) -> reply(From, {ok, Msg}).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Internal Implementation
@@ -106,7 +106,9 @@ qtreeNode(Bound, Limit, Parent, Children) ->
 	    		true -> send_add(Parent, Element)
 	  		end,
 	  		qtreeNode(Bound, Limit, Parent, Children);
-	  	{mapFun, MapFun, MapBound} -> [mapFunChild(C, MapFun, MapBound, Bound) || C <- Children];
+	  	{mapFun, MapFun, MapBound} ->
+            [mapFunChild(C, MapFun, MapBound, Bound) || C <- Children],
+            qtreeNode(Bound, Limit, Parent, Children);
 	  	{mapTreeFun, TreeFun} ->
             TreeFun(Bound),
 	  		[send_mapTree(C, TreeFun) || {_, C} <- Children],
@@ -138,14 +140,23 @@ qtreeLeaf(Bound, Limit, Parent, Data) ->
 	    		{true, _} -> qtreeLeaf(Bound, Limit, Parent, Data)
 	  		end;
 	  	{mapFun, MapFun, MapBound} ->
-	  		case intersectBounds(Bound, MapBound) of
-	  			{X1, Y1, X2, Y2} ->
-	  				NewData = [case outOfBound({X1, Y1, X2, Y2}, E1) of false -> MapFun(E1); true -> E1 end || E1 <- Data],
-	  				OutOfBoundData = [E2 || E2 <- NewData, outOfBound(Bound, E2)],
-	  				[send_add(Parent, E3) || E3 <- OutOfBoundData],
-	  				qtreeLeaf(Bound, Limit, Parent, NewData -- OutOfBoundData);
-	  			empty -> ok
-	  		end;
+            LeafMapFun = fun() ->
+	  	        case intersectBounds(Bound, MapBound) of
+                    {X1, Y1, X2, Y2} ->
+	  		            NewData = [case outOfBound({X1, Y1, X2, Y2}, E1) of false -> MapFun(E1); true -> E1 end || E1 <- Data],
+	  				    OutOfBoundData = [E2 || E2 <- NewData, outOfBound(Bound, E2)],
+                        {new, NewData, OutOfBoundData};
+	  			    empty -> empty
+	  		    end
+            end,
+            try LeafMapFun() of
+                empty -> qtreeLeaf(Bound, Limit, Parent, Data);
+                {new, NewData, OutOfBoundData} ->
+                    [send_add(Parent, E3) || E3 <- OutOfBoundData],
+                    qtreeLeaf(Bound, Limit, Parent, NewData -- OutOfBoundData)
+            catch
+                error:_ -> qtreeLeaf(Bound, Limit, Parent, Data)
+            end;
 	  	{mapTreeFun, TreeFun} ->
 	  		TreeFun(Bound),
 	  		qtreeLeaf(Bound, Limit, Parent, Data)
