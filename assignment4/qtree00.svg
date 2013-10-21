@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg">
+
+<circle cx="110" cy="110" r="2" stroke="black" stroke-width="2" fill="red"/>
+<circle cx="100" cy="100" r="2" stroke="black" stroke-width="2" fill="red"/>
+<circle cx="200" cy="200" r="2" stroke="black" stroke-width="2" fill="red"/>
+<circle cx="208" cy="201" r="2" stroke="black" stroke-width="2" fill="red"/>
+<circle cx="208" cy="208" r="2" stroke="black" stroke-width="2" fill="red"/>
+<circle cx="20" cy="20" r="2" stroke="black" stroke-width="2" fill="red"/>
+<circle cx="210" cy="210" r="2" stroke="black" stroke-width="2" fill="red"/>
+<circle cx="20" cy="30" r="2" stroke="black" stroke-width="2" fill="red"/>
+<circle cx="30" cy="30" r="2" stroke="black" stroke-width="2" fill="red"/>
+<circle cx="25" cy="25" r="2" stroke="black" stroke-width="2" fill="red"/>
+
+</svg>

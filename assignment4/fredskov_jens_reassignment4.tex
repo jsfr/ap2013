@@ -1,0 +1,136 @@
+\documentclass[a4paper, 11pt]{article}
+\usepackage[utf8x]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{ucs}
+\usepackage[english]{babel}
+\usepackage{lmodern}
+\usepackage{mathtools, amsfonts}
+\usepackage[parfill]{parskip}
+\usepackage{graphicx, float}
+\usepackage{caption, subcaption}
+
+\usepackage{fancyhdr} % Custom headers and footers
+\pagestyle{fancyplain} % Makes all pages in the document conform to the custom headers and footers
+\fancyhead{} % No page header - if you want one, create it in the same way as the footers below
+\fancyfoot[L]{} % Empty left footer
+\fancyfoot[C]{} % Empty center footer
+\fancyfoot[R]{\thepage} % Page numbering for right footer
+\renewcommand{\headrulewidth}{0pt} % Remove header underlines
+\renewcommand{\footrulewidth}{0pt} % Remove footer underlines
+\setlength{\headheight}{13.6pt} % Customize the height of the header
+
+\widowpenalty=1000
+\clubpenalty=1000
+
+\newcommand{\horrule}[1]{\rule{\linewidth}{#1}} % Create horizontal rule command with 1 argument of height
+
+\newcommand{\executeiffilenewer}[3]{%
+    \ifnum\pdfstrcmp{\pdffilemoddate{#1}}%
+    {\pdffilemoddate{#2}}>0%
+    {\immediate\write18{#3}}\fi%
+}
+
+\newcommand{\includesvg}[1]{%
+    \executeiffilenewer{#1.svg}{#1.pdf}%
+    {inkscape -z -D --file=#1.svg %
+    --export-pdf=#1.pdf --export-latex}%
+    \input{#1.pdf_tex}
+}
+
+\title{ 
+\normalfont\normalsize 
+\textsc{University of Copenhagen} \\ [25pt] % Your university, school and/or department name(s)
+\horrule{0.5pt} \\[0.4cm] % Thin top horizontal rule
+\huge Assignment 4: Swarm Simulation using Quadtrees\\ \Large - Resubmission % The assignment title
+\horrule{2pt} \\[0.5cm] % Thick bottom horizontal rule
+}
+
+\author{Jens Fredskov (chw752)} % Your name
+
+\date{\normalsize\today} % Today's date or a custom date
+
+\begin{document}
+\maketitle
+
+\section{Introduction} % (fold)
+\label{sec:introduction}
+
+The following report describes the implementation and testing of a quadtree library and fish farm simulation in Erlang.
+% section introduction (end)
+
+\section{Implementation} % (fold)
+\label{sec:implementation}
+
+\subsection{The Quadtree} % (fold)
+\label{sub:the_quadtree}
+
+The quadtree library has been implemented in the file \texttt{quadtree.erl}. The functions used for the coordinator, nodes and leaves all communicate with asynchronous messaging. This e.g. means that we do not wait around for an element to be inserted, by just send the message and move on.
+
+The children of a node is contained in a list of tuples, where each child is matched with its respective corner, allowing us to easier decide where messages should be sent.
+
+When a leaf reaches its limit, it converts to a node by spawning four new empty leaves, and then afterwards sending adds to these with the correct elements.
+
+When the tree applies a function (with \texttt{MapFunction/3}) the function propagates down through the tree to all leaves which have elements within the specified bounds. After applying the function if all elements in a leaf which are out of bounds, will be sent to its parent as an add. In this way the elements move up through the tree and down to the new leaf where it should be added.
+
+If the function which is mapped fails and throws and error, the leaf recovers by starting itself with its old data.
+% subsection the_quadtree (end)
+
+\subsubsection{The Fish Farm} % (fold)
+\label{ssub:the_fish_farm}
+
+The fish farm has been implemented in \texttt{swarm.erl}. The simulation is started using the function \texttt{run/0}, which initializes a farm with 10 predefined fish and then enters the simulation loop with the two phases.
+
+Note that the loop also contains an if-clause which prints an SVG with the fish. If this is unwanted it can be commented out. It however helps in visualizing the movement of the fish.
+
+To update the fish a function \texttt{updateFish1/2} is mapped over the entire universe of fish. This function maps a function to return fish that are within one of the zones, for each fish in the tree. Lastly it calls \texttt{updateFish2/1} which accepts the messages back from the before mapped function and updates the fish respectively. Since we cannot know how many messages we should expect back \texttt{updateFish2/1} returns the updated fish if it receives no messages for 250ms.
+
+The change counter has been changed so that it is instantiated (and reset) to 1 instead of 0, as a counter of 0 gives an arithmetic error in \texttt{moveFish/1} which in turn means that all fish very quickly comes to a halt and never moves again.
+
+% subsubsection the_fish_farm (end)
+
+% section implementation (end)
+
+\section{Testing} % (fold)
+\label{sec:testing}
+
+The quadtree has been tested using the handed out printer example, and of course using the simulation. In the tested cases, the tree has behaved correctly, but these tests are not exhaustive.
+
+The swarm has been tested by running it and checking the generated SVG files. The swarm in general behaves somewhat odd, and from the tests it is still no clear wheter this behaviour is the desired. In figure \ref{fig:qtree} we can see iteration 1, 10 and 20 from the simulation.
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.25\textwidth}
+        \centering
+        \def\svgwidth{1\textwidth}
+        \includesvg{qtree00}
+    \end{subfigure}
+    \hspace{10px}\vline\hspace{10px}
+    \begin{subfigure}[b]{0.25\textwidth}
+        \centering  
+        \def\svgwidth{1\textwidth}
+        \includesvg{qtree01}
+    \end{subfigure}
+    \hspace{10px}\vline\hspace{10px}
+    \begin{subfigure}[b]{0.25\textwidth}
+        \centering
+        \def\svgwidth{1\textwidth}
+        \includesvg{qtree02}
+    \end{subfigure}
+\caption{Iterations 1, 10, 20 of the simulation.}
+\label{fig:qtree}
+\end{figure}
+
+As seen it seems like the fish are repelled by each other but might not attract that well. Around iteration 100 or so however the two middle fish will be in a formation with one of the other fish (many of the others will have swam out of bounds).
+
+We can therefore not from these tests conclude wheter the simulation works correctly.
+
+% section testing (end)
+
+\section{Conclusion} % (fold)
+\label{sec:conclusion}
+
+We have now described the implementation of the quadtree library and fish farm simulation. We have also described how the implementation has been tested and have concluded that we cannot conclude whether the implementation is correct, but that all tried instances of at least the quadtree worked as expected.
+
+% section conclusion (end)
+
+\end{document}
